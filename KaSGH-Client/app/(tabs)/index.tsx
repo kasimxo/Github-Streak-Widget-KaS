@@ -1,70 +1,128 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, 
+  StyleSheet, 
+  Platform,
+  View,
+Pressable,
+Dimensions } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useState } from 'react';
+
+var intervalo: any
+
+const screen = Dimensions.get("window");
+
+
+function formatNumber(num: number) {
+return `0${num}`.slice(-2);
+}
+
+
+function getSeconds(input: number) {
+  const minutes = Math.floor(input / 60);
+  const seconds = input - minutes * 60;
+  const minutos = formatNumber(minutes);
+  const segundos = formatNumber(seconds);
+  
+  return `${minutos}:${segundos}` ;
+}
+
+var total = 0
 
 export default function HomeScreen() {
+
+  const [isRunning, setIsRunning] = useState(false)
+  const [tiempo, setTiempo] = useState(getSeconds(total))
+  //var { minutos, segundos } = getSeconds(total);
+
+  function stop() {
+    setIsRunning(false)
+    clearInterval(intervalo)
+  }
+
+  function start(){
+    setIsRunning(true)
+    intervalo = setInterval(() => {
+      total +=1 
+      setTiempo(getSeconds(total))
+    }, 1000)
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <ThemedText style={styles.timerText}>{tiempo}</ThemedText>
+      {isRunning ? 
+      <Pressable
+            onPressIn={stop}
+            style={[styles.button, styles.buttonStop]}
+          >
+        <ThemedText style={[styles.buttonText, styles.buttonTextStop]}>Stop</ThemedText>
+      </Pressable>
+      : 
+      <Pressable
+            onPressIn={start}
+            style={[styles.button, styles.buttonStop]}
+          >
+        <ThemedText style={[styles.buttonText, styles.buttonText]}>Start</ThemedText>
+      </Pressable>
+      }
+
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#07121B",
+    alignItems: "center",
+    justifyContent: "center"
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  button: {
+    borderWidth: 10,
+    borderColor: "#89AAFF",
+    width: screen.width / 2,
+    height: screen.width / 2,
+    borderRadius: screen.width / 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 30
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  buttonStop: {
+    borderColor: "#FF851B"
   },
+  buttonText: {
+    fontSize: 25,
+    color: "#89AAFF"
+  },
+  buttonTextStop: {
+    color: "#FF851B"
+  },
+  timerText: {
+    width: "auto",
+    height: "auto",
+    color: "#fff",
+    fontSize: 25
+  },
+  picker: {
+    width: 50,
+    ...Platform.select({
+      android: {
+        color: "#fff",
+        backgroundColor: "#07121B",
+        marginLeft: 10
+      }
+    })
+  },
+  pickerItem: {
+    color: "#fff",
+    fontSize: 20
+  },
+  pickerContainer: {
+    flexDirection: "row",
+    alignItems: "center"
+  }
 });
